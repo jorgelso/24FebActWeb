@@ -1,101 +1,130 @@
-import Image from "next/image";
+"use client";
+import { useFetchData } from "@/hooks/useFetchData";
+import { useState, useEffect } from "react";
+import Modal from "react-modal";
+
+Modal.setAppElement("body");
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [cityInput, setCityInput] = useState<string>(""); 
+  const [city, setCity] = useState<string | null>(null);  
+  const { data, loading, error } = useFetchData(city);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [cityData, setCityData] = useState<typeof data[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cityInput.trim()) return;
+    setCity(cityInput);
+  };
+  
+  useEffect(() => {
+    if (error) {
+      setIsModalOpen(true);
+    } else if (data) {
+      setCityData((prevList) => [...prevList, data]); //Mantiene lo previo y añade data
+    }
+  }, [data, error]); // Funciona cuando data o error cambian de valor
+
+  const removeCard = (index: number) => {
+    setCityData((prevList) => prevList.filter((_, i) => i !== index));
+  };
+
+  return (
+    <>
+      <div className="flex justify-center w-full min-w-[500px] h-full min-h-screen p-16">
+        <div className="flex flex-col w-full">
+          <form onSubmit={handleSubmit} className="pb-10">
+            <input
+              type="text"
+              placeholder="City"
+              value={cityInput}
+              name="city"
+              className="border p-2 rounded w-full bg-slate-50"
+              onChange={(e) => setCityInput(e.target.value)}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </form>
+
+          {loading && <p>Loading...</p>}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {cityData.map((city, index) => (
+              <WeatherCard key={index} city={city} index={index} removeCard={removeCard} />
+            ))}
+          </div>
+
+          <Modal
+            isOpen={isModalOpen}
+            onRequestClose={() => setIsModalOpen(false)}
+            contentLabel="Invalid search"
+            className="bg-white p-6 rounded shadow-lg mx-auto max-w-sm"
+            overlayClassName="fixed inset-0 bg-black bg-opacity-20 flex justify-center items-center"
           >
-            Read our docs
-          </a>
+            <h2 className="text-lg font-bold">City does not exist</h2>
+            <p>Please enter a valid city name.</p>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="mt-5 px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Close
+            </button>
+          </Modal>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    </>
+  );
+}
+
+function WeatherCard({ city, index, removeCard }: { city: any; index: number; removeCard: (index: number) => void }) {
+  // Extract values
+  const { text: condition, icon } = city.current.condition;
+  const isDay = city.current.is_day === 1;
+  const temperature = city.current.temp_c;
+  const humidity = city.current.humidity;
+  const windSpeed = city.current.wind_kph;
+  const rainProbability = city.current.precip_mm;
+
+  // Determine background style
+  const getBackgroundStyle = () => {
+    if (["Clear", "Sunny", "Partly cloudy"].includes(condition)) {
+      return isDay ? "bg-gradient-to-r from-blue-400 to-blue-600" : "bg-gradient-to-r from-blue-800 to-blue-900";
+    }
+    if (["Cloudy", "Overcast", "Mist", "Fog"].includes(condition)) {
+      return "bg-gradient-to-r from-gray-500 to-gray-700";
+    }
+    if (["Light rain", "Drizzle", "Moderate rain", "Heavy rain", "Torrential rain", "Thunderstorms"].includes(condition)) {
+      return "bg-gradient-to-r from-gray-700 to-gray-900";
+    }
+    return "bg-gradient-to-r from-green-300 to-green-400";
+  };
+
+  return (
+    <div className={`relative p-5 border rounded-lg shadow-md text-white ${getBackgroundStyle()}`}>
+      <button
+        className="absolute top-4 right-4 w-8 h-8 opacity-100 hover:text-red-500 text-white text-xl flex items-center justify-center rounded-full"
+        onClick={() => removeCard(index)}
+      >
+        ✖
+      </button>
+
+      <h2 className="text-2xl font-semibold text-center">
+        {city.location.name}, {city.location.country}
+      </h2>
+
+      <div className="flex justify-center my-4">
+        <img src={`https:${icon}`} alt={condition} className="w-20 h-20" />
+      </div>
+
+      <p className="text-5xl font-bold text-center">{temperature}°C</p>
+      
+      <p className="text-lg text-center italic">{condition}</p>
+
+      <div className="flex justify-between mt-4 text-sm">
+        <p>Humidity: <span className="font-semibold">{humidity}%</span></p>
+        <p>Rain: <span className="font-semibold">{rainProbability}mm</span></p>
+        <p>Wind: <span className="font-semibold">{windSpeed} kph</span></p>
+      </div>
     </div>
   );
 }
