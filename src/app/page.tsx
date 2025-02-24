@@ -65,7 +65,7 @@ export default function Home() {
             <p>Please enter a valid city name.</p>
             <button
               onClick={() => setIsModalOpen(false)}
-              className="mt-5 px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="mt-5 px-5 py-2 bg-red-600 text-white bg- rounded hover:bg-red-700"
             >
               Close
             </button>
@@ -77,7 +77,6 @@ export default function Home() {
 }
 
 function WeatherCard({ city, index, removeCard }: { city: any; index: number; removeCard: (index: number) => void }) {
-  // Extract values
   const { text: condition, icon } = city.current.condition;
   const isDay = city.current.is_day === 1;
   const temperature = city.current.temp_c;
@@ -85,18 +84,18 @@ function WeatherCard({ city, index, removeCard }: { city: any; index: number; re
   const windSpeed = city.current.wind_kph;
   const rainProbability = city.current.precip_mm;
 
-  // Determine background style
+  
   const getBackgroundStyle = () => {
     if (["Clear", "Sunny", "Partly cloudy"].includes(condition)) {
-      return isDay ? "bg-gradient-to-r from-blue-400 to-blue-600" : "bg-gradient-to-r from-blue-800 to-blue-900";
+      return isDay ? "bg-gradient-to-r from-blue-400 to-blue-600" : "bg-gradient-to-r from-indigo-950 to-violet-950";
     }
     if (["Cloudy", "Overcast", "Mist", "Fog"].includes(condition)) {
       return "bg-gradient-to-r from-gray-500 to-gray-700";
     }
-    if (["Light rain", "Drizzle", "Moderate rain", "Heavy rain", "Torrential rain", "Thunderstorms"].includes(condition)) {
+    if (["Light rain", "Drizzle", "Moderate rain", "Patchy light rain","Light rain shower", "Heavy rain", "Torrential rain", "Thunderstorms"].includes(condition)) {
       return "bg-gradient-to-r from-gray-700 to-gray-900";
     }
-    return "bg-gradient-to-r from-green-300 to-green-400";
+    return "bg-gradient-to-r from-green-700 to-green-900";
   };
 
   return (
